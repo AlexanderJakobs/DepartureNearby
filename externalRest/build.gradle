@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':internalrpc-stub')
+    implementation project(':displaymanager')
+
+    // gRPC Spring Boot Starter
+    implementation "net.devh:grpc-server-spring-boot-starter:${rootProject.ext.grpcSpringBootStarterVersion}"
+    implementation "net.devh:grpc-client-spring-boot-starter:${rootProject.ext.grpcSpringBootStarterVersion}"
+
+    // Spring
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation 'org.mockito:mockito-core:5.15.2'
+    testImplementation 'net.bytebuddy:byte-buddy:1.15.11'
+    testImplementation 'net.bytebuddy:byte-buddy-agent:1.15.11'
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+    jvmArgs '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED'
+}

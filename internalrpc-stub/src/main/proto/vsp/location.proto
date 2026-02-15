@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package vsp;
+
+option java_multiple_files = true;
+option java_package = "vsp";
+option java_outer_classname = "LocationhandlerProto";
+
+import "vsp/common.proto";
+
+// Der Locationhandler hostet diesen Service (Server)
+// DisplayManager ruft ihn auf (Client)
+service LocationhandlerIngress {
+  rpc userPassLocation(UserPassLocationRequest) returns (Ack);
+}
+
+message UserPassLocationRequest {
+  RequestMeta meta = 1;
+  Address address = 2;
+}

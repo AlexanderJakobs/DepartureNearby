@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package vsp;
+
+option java_multiple_files = true;
+option java_package = "vsp";
+option java_outer_classname = "ExternalProto";
+
+import "vsp/common.proto";
+
+
+// ============================================
+// ExternalRest hosts these services (Server)
+// Locationhandler and Transportplan call them (Client)
+// ============================================
+
+// Geocoding Service - wraps Nominatim API
+service GeocodingService {
+  // Converts an Address to Coordinates
+  rpc geocode(GeocodeRequest) returns (GeocodeResponse);
+}
+
+message GeocodeRequest {
+  RequestMeta meta = 1;
+  Address address = 2;
+}
+
+message GeocodeResponse {
+  oneof result {
+    Coordinates coordinates = 1;
+    ErrorStatus error = 2;
+  }
+  ResultMeta result_meta = 3;
+}
+
+// Departures Service - wraps Geofox API
+service DeparturesService {
+  // Gets nearby stations with departures for given coordinates
+  rpc getNearbyStations(GetNearbyStationsRequest) returns (GetNearbyStationsResponse);
+
+  // Gets departures for a specific station (by id or name)
+  rpc getDeparturesForStations(GetDeparturesForStationsRequest) returns (GetDeparturesForStationsResponse);
+}
+
+message GetDeparturesForStationsRequest {
+  RequestMeta meta = 1;
+
+  repeated DepartureStation stations = 2; // stations with empty departures
+
+  int32 max_departures = 3; // Default idea: 10
+}
+
+message GetDeparturesForStationsResponse {
+  oneof result {
+    DepartureStationList stations = 1; // from common.proto (stationName + departures)
+    ErrorStatus error = 2;
+  }
+  ResultMeta result_meta = 3;
+}
+message GetNearbyStationsRequest {
+  RequestMeta meta = 1;
+  Coordinates coordinates = 2;
+  int32 max_stations = 3; // Default: 3
+}
+
+message GetNearbyStationsResponse {
+  oneof result {
+    DepartureStationList stations = 1;
+    ErrorStatus error = 2;
+  }
+  ResultMeta result_meta = 3;
+}
+
+message DepartureStationList {
+  repeated DepartureStation stations = 1;
+}
+

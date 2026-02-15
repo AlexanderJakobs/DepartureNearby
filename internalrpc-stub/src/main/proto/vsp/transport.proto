@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package vsp;
+
+option java_multiple_files = true;
+option java_package = "vsp";
+option java_outer_classname = "TransportplanProto";
+
+import "vsp/common.proto";
+
+// Der Transportplan hostet diesen Service (Server)
+// Locationhandler ruft ihn auf (Client)
+service TransportplanIngress {
+  rpc getDepartures(GetDeparturesRequest) returns (Ack);
+}
+
+message GetDeparturesRequest {
+  RequestMeta meta = 1;
+  Coordinates coordinates = 2;
+}
+

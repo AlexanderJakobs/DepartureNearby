@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package vsp;
+
+option java_multiple_files = true;
+option java_package = "vsp";
+option java_outer_classname = "DisplayProto";
+
+import "vsp/common.proto";
+import "google/protobuf/timestamp.proto";
+
+// Der DisplayManager hostet diesen Service (Server)
+// Transportplan ruft ihn auf (Client)
+service DisplaymanagerIngress {
+  rpc showDepartures(ShowDeparturesRequest) returns (Ack);
+
+  rpc userPassLocation(ExternalInput) returns (Ack);
+}
+
+message ShowDeparturesRequest {
+  RequestMeta meta = 1;
+  repeated DepartureStation stations = 2;
+  google.protobuf.Timestamp data_fetched_at = 3;
+}
+
+message ExternalInput {
+  string address = 2;
+}

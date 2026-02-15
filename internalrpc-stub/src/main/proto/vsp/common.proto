@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package vsp;
+
+option java_multiple_files = true;
+option java_package = "vsp";
+option java_outer_classname = "CommonProto";
+
+import "google/protobuf/timestamp.proto";
+
+// --- Meta / Fehler / Korrelation ---
+
+message Ack {
+  google.protobuf.Timestamp accepted_at = 1; // oder processed_at
+}
+
+message RequestMeta {
+  // Für Tracing über Prozesse hinweg (z.B. UUID v4 als String)
+  string correlation_id = 1;
+
+  // Optional: wer ruft (DisplayManager/Locationhandler/Transportplan)
+  string caller = 2;
+
+  // Optional: Client/Session
+  string session_id = 3;
+}
+
+message ErrorStatus {
+  enum Code {
+    CODE_UNSPECIFIED = 0;
+    INVALID_ARGUMENT = 1;
+    NOT_FOUND = 2;
+    TIMEOUT = 3;
+    UNAVAILABLE = 4;
+    RATE_LIMITED = 5;
+    INTERNAL = 6;
+  }
+
+  Code code = 1;
+  string message = 2;
+  string details = 3;
+}
+
+message ResultMeta {
+  google.protobuf.Timestamp generated_at = 1;
+  // z.B. "HVV/Geofox", "Cache", etc.
+  string source = 2;
+}
+
+// --- Domänenobjekte ---
+
+message Address {
+  string street = 1;
+  string house_number = 2;
+  string city = 3;        // Default: Hamburg
+  string postal_code = 4; // optional
+  string country = 5;     // Default: DE
+}
+
+message Coordinates {
+  // WGS84
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message Departure {
+  // z.B. "U1", "S3", "Bus 5"
+  string lineName = 1;
+
+  // Optional: absolute Zeit
+  google.protobuf.Timestamp departureTime = 2;
+
+}
+
+message DepartureStation {
+  string stationName = 1;
+  repeated Departure departures = 2;
+  double distance = 3; // optional
+  string stationId = 4; // optional
+}
