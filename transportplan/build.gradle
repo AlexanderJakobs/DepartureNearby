@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':internalrpc-stub')
+
+    // gRPC runtime
+    implementation("io.grpc:grpc-stub:1.66.0")
+    implementation("io.grpc:grpc-protobuf:1.66.0")
+    implementation("com.google.protobuf:protobuf-java:4.28.2")
+    // gRPC Spring Boot Starter
+    implementation "net.devh:grpc-server-spring-boot-starter:${rootProject.ext.grpcSpringBootStarterVersion}"
+    implementation "net.devh:grpc-client-spring-boot-starter:${rootProject.ext.grpcSpringBootStarterVersion}"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+    jvmArgs '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED'
+}
+
+tasks.register('runManualTest', JavaExec) {
+    description = 'Run TransportplanManualTest'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'vsp.TransportplanManualTest'
+}
