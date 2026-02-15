@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  externalrest:
+    build:
+      context: .
+      dockerfile: externalRest/Dockerfile
+    container_name: externalrest
+    ports:
+      - "8081:8081"   # REST API (external access)
+      - "9090:9090"   # gRPC
+    environment:
+      - GRPC_CLIENT_DISPLAYMANAGER_ADDRESS=static://displaymanager:9091
+    networks:
+      - vsp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  displaymanager:
+    build:
+      context: .
+      dockerfile: displaymanager/Dockerfile
+    container_name: displaymanager
+    ports:
+      - "9091:9091"   # gRPC
+    environment:
+      - GRPC_CLIENT_LOCATIONHANDLER_ADDRESS=static://locationhandler:9092
+      - GRPC_CLIENT_EXTERNALREST_ADDRESS=static://externalrest:9090
+    depends_on:
+      - externalrest
+    networks:
+      - vsp-network
+
+  locationhandler:
+    build:
+      context: .
+      dockerfile: locationhandler/Dockerfile
+    container_name: locationhandler
+    ports:
+      - "9092:9092"   # gRPC
+    environment:
+      - GRPC_CLIENT_EXTERNALREST_ADDRESS=static://externalrest:9090
+      - GRPC_CLIENT_TRANSPORTPLAN_ADDRESS=static://transportplan:9093
+    depends_on:
+      - externalrest
+    networks:
+      - vsp-network
+
+  transportplan:
+    build:
+      context: .
+      dockerfile: transportplan/Dockerfile
+    container_name: transportplan
+    ports:
+      - "9093:9093"   # gRPC
+    environment:
+      - GRPC_CLIENT_EXTERNALREST_ADDRESS=static://externalrest:9090
+      - GRPC_CLIENT_DISPLAYMANAGER_ADDRESS=static://displaymanager:9091
+    depends_on:
+      - externalrest
+      - displaymanager
+    networks:
+      - vsp-network
+
+networks:
+  vsp-network:
+    driver: bridge

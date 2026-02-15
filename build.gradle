@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5' apply false
+    id 'io.spring.dependency-management' version '1.1.6' apply false
+    id 'com.google.protobuf' version '0.9.4' apply false
+}
+
+// Zentrale Version-Definitionen
+ext {
+    grpcVersion = '1.66.0'
+    protobufVersion = '4.28.2'
+    grpcSpringBootStarterVersion = '3.1.0.RELEASE'
+    springBootVersion = '3.3.5'
+}
+
+allprojects {
+    group = 'vsp'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+    tasks.withType(JavaExec).configureEach { jvmArgs += [ "-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8" ] }
+}
+
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    // ✅ Erzwinge konsistente gRPC-Versionen in ALLEN Modulen
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { details ->
+                if (details.requested.group == 'io.grpc') {
+                    details.useVersion rootProject.ext.grpcVersion
+                }
+                if (details.requested.group == 'com.google.protobuf' &&
+                        details.requested.name == 'protobuf-java') {
+                    details.useVersion rootProject.ext.protobufVersion
+                }
+            }
+        }
+    }
+}
